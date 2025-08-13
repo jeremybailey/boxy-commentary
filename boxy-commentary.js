@@ -31,19 +31,59 @@
   function getStyles(config) {
     const pos = config.widgetPosition;
     return `
+      /* Container styles */
+      #boxy-commentary-container {
+        position: fixed !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        z-index: 10000 !important;
+        width: auto !important;
+        height: auto !important;
+      }
+      
+      /* Widget styles */
       .boxy-container {
-        position: fixed;
-        bottom: ${pos.bottom};
-        right: ${pos.right};
-        width: ${pos.width};
-        z-index: ${pos.zIndex};
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        background: #1a1a2e;
-        color: #f8f9fa;
-        border: 1px solid #2a2a3a;
+        position: relative !important;
+        display: block !important;
+        width: ${pos.width} !important;
+        min-width: 300px !important;
+        min-height: 100px !important;
+        margin: 20px !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        background: #1a1a2e !important;
+        color: #f8f9fa !important;
+        border: 2px solid #4a6fa5 !important;
+        padding: 15px !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+      }
+      
+      /* Header styles */
+      .boxy-header {
+        margin: -15px -15px 15px -15px !important;
+        padding: 10px 15px !important;
+        background: #4a6fa5 !important;
+        color: white !important;
+        border-radius: 10px 10px 0 0 !important;
+      }
+      
+      .boxy-header h3 {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+      }
+      
+      /* Content styles */
+      .boxy-content {
+        min-height: 50px !important;
+      }
+      
+      .boxy-content p {
+        margin: 0 !important;
+        padding: 0 !important;
       }
       .boxy-header {
         background: #4a6fa5;
@@ -108,18 +148,20 @@
     try {
       currentConfig = mergeConfig(userConfig);
       
-      // Create shadow DOM
+      // Create shadow DOM container
       const container = document.createElement('div');
       container.id = 'boxy-commentary-container';
+      // Make sure the container is in the document flow
+      container.style.position = 'fixed';
+      container.style.bottom = '0';
+      container.style.right = '0';
+      container.style.zIndex = '10000';
       document.body.appendChild(container);
+      
+      // Attach shadow root
       shadowRoot = container.attachShadow({ mode: 'open' });
 
-      // Add styles
-      const style = document.createElement('style');
-      style.textContent = getStyles(currentConfig);
-      shadowRoot.appendChild(style);
-
-      // Create widget
+      // Create widget structure
       const widget = document.createElement('div');
       widget.className = 'boxy-container';
       widget.innerHTML = `
@@ -130,13 +172,30 @@
           <p>Welcome to the tournament! 🥊</p>
         </div>
       `;
+      
+      // Add styles
+      const style = document.createElement('style');
+      style.textContent = getStyles(currentConfig);
+      
+      // Append styles and widget to shadow root
+      shadowRoot.appendChild(style);
       shadowRoot.appendChild(widget);
 
+      // Force a reflow to ensure styles are applied
+      widget.offsetHeight;
+      
+      // Log debug info
+      console.log('Boxy Commentary initialized successfully');
+      console.log('Widget dimensions:', {
+        width: widget.offsetWidth,
+        height: widget.offsetHeight,
+        position: window.getComputedStyle(widget).position,
+        display: window.getComputedStyle(widget).display
+      });
+      
       // Set up polling
       startPolling(currentConfig.pollInterval);
       isInitialized = true;
-      
-      console.log('Boxy Commentary initialized successfully');
     } catch (error) {
       console.error('Error initializing Boxy:', error);
     }
@@ -213,13 +272,29 @@
   }
 
   // Expose to global scope
+  const BoxyCommentary = { init: initBoxyCommentary };
+  
+  // For browser environment
   if (typeof window !== 'undefined') {
-    window.BoxyCommentary = { init: initBoxyCommentary };
+    window.BoxyCommentary = BoxyCommentary;
+    
+    // Auto-initialize if data-boxy attribute is present
+    const init = function() {
+      if (document.querySelector('[data-boxy]')) {
+        initBoxyCommentary();
+      }
+    };
     
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', autoInit);
+      document.addEventListener('DOMContentLoaded', init);
     } else {
-      autoInit();
+      // If document is already loaded
+      setTimeout(init, 0);
     }
+  }
+  
+  // For CommonJS/Node.js environment
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = BoxyCommentary;
   }
 })();
