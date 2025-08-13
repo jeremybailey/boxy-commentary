@@ -12,10 +12,10 @@
     styles: `
       .boxy-container {
         position: fixed;
-        bottom: ${this.widgetPosition.bottom};
-        right: ${this.widgetPosition.right};
-        width: ${this.widgetPosition.width};
-        z-index: ${this.widgetPosition.zIndex};
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        z-index: 10000;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         border-radius: 12px;
         overflow: hidden;
@@ -85,6 +85,17 @@
 
     // Merge config
     Object.assign(CONFIG, config);
+    
+    // Update styles with any custom positions
+    if (config.widgetPosition) {
+      const style = CONFIG.styles
+        .replace(/bottom: \d+px/, `bottom: ${config.widgetPosition.bottom || '20px'}`)
+        .replace(/right: \d+px/, `right: ${config.widgetPosition.right || '20px'}`)
+        .replace(/width: \d+px/, `width: ${config.widgetPosition.width || '300px'}`)
+        .replace(/z-index: \d+/, `z-index: ${config.widgetPosition.zIndex || '10000'}`);
+      
+      CONFIG.styles = style;
+    }
 
     try {
       // Create shadow DOM
@@ -240,13 +251,18 @@
     }
   }
 
-  // Expose the init function globally
-  window.initBoxyCommentary = initBoxyCommentary;
+    // Expose the init function globally
+  window.BoxyCommentary = {
+    init: initBoxyCommentary
+  };
 
   // Auto-initialize if data-boxy attribute is present
   document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('[data-boxy]')) {
-      window.initBoxyCommentary();
+      initBoxyCommentary();
     }
   });
+
+  // For backward compatibility
+  window.initBoxyCommentary = initBoxyCommentary;
 })();
