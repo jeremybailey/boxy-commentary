@@ -1,0 +1,21 @@
+{
+  "name": "boxy-commentary",
+  "version": "1.0.0",
+  "description": "A lightweight, embeddable AI commentary widget for tournament applications",
+  "main": "boxy-commentary.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Open test.html in a browser to test\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/boxy-commentary.git"
+  },
+  "keywords": ["commentary", "ai", "tournament", "widget", "esports"],
+  "author": "Your Name",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/boxy-commentary/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/boxy-commentary#readme"
+}

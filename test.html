@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boxy Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        #state-display {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Boxy Widget Test</h1>
+    
+    <div class="controls">
+        <button onclick="simulateTournamentStart()">Simulate Tournament Start</button>
+        <button onclick="simulateMatchEnd()">Simulate Match End</button>
+        <button onclick="simulateTournamentEnd()">Simulate Tournament End</button>
+    </div>
+    
+    <h3>Current Tournament State:</h3>
+    <div id="state-display">No state yet</div>
+
+    <!-- Load the local Boxy widget -->
+    <script src="boxy-commentary.js"></script>
+    <script>
+        // Initialize Boxy
+        BoxyCommentary.init({
+            // Uncomment to test custom positioning
+            // widgetPosition: {
+            //     bottom: '40px',
+            //     right: '40px',
+            //     width: '350px'
+            // }
+        });
+
+        // Test data
+        let testState = {
+            players: ['Player 1', 'Player 2', 'Player 3', 'Player 4'],
+            rounds: [],
+            updatedAt: Date.now()
+        };
+
+        // Update the state display
+        function updateStateDisplay() {
+            document.getElementById('state-display').textContent = 
+                JSON.stringify(testState, null, 2);
+            window.tournamentState = {...testState};
+            window.dispatchEvent(new Event('tournamentStateUpdated'));
+        }
+
+        // Test functions
+        function simulateTournamentStart() {
+            testState = {
+                players: ['Player 1', 'Player 2', 'Player 3', 'Player 4'],
+                rounds: [],
+                updatedAt: Date.now()
+            };
+            updateStateDisplay();
+        }
+
+        function simulateMatchEnd() {
+            const roundIndex = testState.rounds.length > 0 ? 
+                testState.rounds.length - 1 : 0;
+                
+            if (!testState.rounds[roundIndex]) {
+                testState.rounds[roundIndex] = [];
+            }
+            
+            const matchNumber = testState.rounds[roundIndex].length + 1;
+            const winner = `Player ${matchNumber}`;
+            
+            testState.rounds[roundIndex].push({
+                players: [`Player ${matchNumber * 2 - 1}`, `Player ${matchNumber * 2}`],
+                winner: winner
+            });
+            
+            testState.updatedAt = Date.now();
+            updateStateDisplay();
+        }
+
+        function simulateTournamentEnd() {
+            testState.winner = testState.players[0];
+            testState.updatedAt = Date.now();
+            updateStateDisplay();
+        }
+
+        // Initial state
+        updateStateDisplay();
+    </script>
+</body>
+</html>
